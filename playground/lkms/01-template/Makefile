@@ -25,12 +25,5 @@ clean:
 
 # Linuxカーネルのコード規約に遵守するようにコードを整形する
 code-style:
-	make indent
-	make checkpatch
-
-indent:
-	indent -linux --line-length95 *.[chsS]
-
-checkpatch:
 	make clean
 	../../../scripts/checkpatch.pl --no-tree -f --max-line-length=95 *.[ch]

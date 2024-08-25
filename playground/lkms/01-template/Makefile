@@ -1,5 +1,5 @@
 # TODO: ここにモジュール名（.cを除いたもの）を設定する
-MODULE_NAME	:= template-lkm
+MODULE_NAME	:= lkm-template
 
 PWD		:= $(shell pwd)
 src		:= $(MODULE_NAME).c

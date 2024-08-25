@@ -18,7 +18,7 @@
 #define OURMODNAME "lkm_sysfs_tutorial"
 
 MODULE_AUTHOR("ruth");
-MODULE_DESCRIPTION("");
+MODULE_DESCRIPTION("implementation of kobject /sys/kernel/ruth/");
 MODULE_LICENSE("Dual MIT/GPL"); // or whatever
 MODULE_VERSION("0.1");
 

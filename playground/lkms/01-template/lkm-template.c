@@ -7,8 +7,8 @@
 
 #define OURMODNAME   "lkm_template"
 
-MODULE_AUTHOR("Kaiwan N Billimoria");
-MODULE_DESCRIPTION("a simple LKM template; do refer to the (better) Makefile as well");
+MODULE_AUTHOR("<author>");
+MODULE_DESCRIPTION("<description about this module>");
 MODULE_LICENSE("Dual MIT/GPL");	// or whatever
 MODULE_VERSION("0.1");
 

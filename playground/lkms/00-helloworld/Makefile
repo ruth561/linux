@@ -1,5 +1,5 @@
 PWD	:= $(shell pwd)
-obj-m	+= helloworld-lkm.o
+obj-m	+= lkm-helloworld.o
 
 
 all:
@@ -7,7 +7,7 @@ all:
 
 qemu:
 	make all
-	cp helloworld-lkm.ko ../../rootfs/misc/
+	cp lkm-helloworld.ko ../../rootfs/misc/
 	cd ../../; make qemu
 
 clean:

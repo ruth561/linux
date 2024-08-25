@@ -14,8 +14,9 @@ QEMU_ARGS	+= -append "console=ttyS0 loglevel=3 nokaslr"
 
 
 qemu:
-	$(MAKE) rootfs.cpio
+	$(MAKE) rootfs
 	$(QEMU) $(QEMU_ARGS)
 
-rootfs.cpio:
+.PHONY: rootfs
+rootfs:
 	cd rootfs; find . -print0 | cpio --null -o --format=newc > ../rootfs.cpio; cd ..

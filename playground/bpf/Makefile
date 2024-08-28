@@ -17,6 +17,7 @@ $(target): ruth.c
 
 .PHONY: qemu
 qemu: $(target)
+	mkdir -p ../rootfs/misc/
 	cp ruth ../rootfs/misc/
 	cd ..; make qemu
 
@@ -32,4 +33,4 @@ kernel-headers:
 #       エントリを出力できるようにしたい。
 .PHONY: gen-entry-for-compile-commands.json
 gen-entry-for-compile-commands.json:
-	@$(CC) $(CFLAGS) -MJ /dev/stdout -o $(target) $(src)
+	@$(CC) $(CFLAGS) -MJ /dev/stderr -o $(target) $(src)

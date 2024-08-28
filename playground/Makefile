@@ -11,6 +11,7 @@ QEMU_ARGS	+= -initrd rootfs.cpio
 QEMU_ARGS	+= -nographic
 # loglevel=3とすると、起動時のメッセージを表示させないことができる
 QEMU_ARGS	+= -append "console=ttyS0 loglevel=3 nokaslr"
+QEMU_ARGS	+= -s
 
 
 qemu:

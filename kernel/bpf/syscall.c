@@ -35,6 +35,7 @@
 #include <linux/rcupdate_trace.h>
 #include <linux/memcontrol.h>
 #include <linux/trace_events.h>
+#include <linux/ruth.h>
 
 #include <net/netfilter/nf_bpf_link.h>
 #include <net/netkit.h>
@@ -2631,6 +2632,13 @@ bpf_prog_load_check_attach(enum bpf_prog_type prog_type,
 		if (expected_attach_type == BPF_NETFILTER)
 			return 0;
 		return -EINVAL;
+	case BPF_PROG_TYPE_RUTH:
+		switch (expected_attach_type) {
+		case BPF_RUTH:
+			return 0;
+		default:
+			return -EINVAL;
+		}
 	case BPF_PROG_TYPE_SYSCALL:
 	case BPF_PROG_TYPE_EXT:
 		if (expected_attach_type)
@@ -3998,6 +4006,8 @@ attach_type_to_prog_type(enum bpf_attach_type attach_type)
 	case BPF_NETKIT_PRIMARY:
 	case BPF_NETKIT_PEER:
 		return BPF_PROG_TYPE_SCHED_CLS;
+	case BPF_RUTH:
+		return BPF_PROG_TYPE_RUTH;
 	default:
 		return BPF_PROG_TYPE_UNSPEC;
 	}
@@ -4084,6 +4094,7 @@ static int bpf_prog_attach_check_attach_type(const struct bpf_prog *prog,
 	 BPF_F_ID |		\
 	 BPF_F_LINK)
 
+// MEMO: bpf(BPF_PROG_ATTACH, ...)の実装
 static int bpf_prog_attach(const union bpf_attr *attr)
 {
 	enum bpf_prog_type ptype;
@@ -4093,6 +4104,7 @@ static int bpf_prog_attach(const union bpf_attr *attr)
 	if (CHECK_ATTR(BPF_PROG_ATTACH))
 		return -EINVAL;
 
+	// MEMO: attach typeからprog typeを解決する
 	ptype = attach_type_to_prog_type(attr->attach_type);
 	if (ptype == BPF_PROG_TYPE_UNSPEC)
 		return -EINVAL;
@@ -4147,6 +4159,9 @@ static int bpf_prog_attach(const union bpf_attr *attr)
 			ret = tcx_prog_attach(attr, prog);
 		else
 			ret = netkit_prog_attach(attr, prog);
+		break;
+	case BPF_PROG_TYPE_RUTH:
+		ret = ruth_prog_attach(attr, prog);
 		break;
 	default:
 		ret = -EINVAL;
@@ -4212,6 +4227,9 @@ static int bpf_prog_detach(const union bpf_attr *attr)
 			ret = tcx_prog_detach(attr, prog);
 		else
 			ret = netkit_prog_detach(attr, prog);
+		break;
+	case BPF_PROG_TYPE_RUTH:
+		ret = ruth_prog_detach(attr, prog);
 		break;
 	default:
 		ret = -EINVAL;

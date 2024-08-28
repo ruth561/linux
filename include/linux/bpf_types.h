@@ -84,6 +84,14 @@ BPF_PROG_TYPE(BPF_PROG_TYPE_NETFILTER, netfilter,
 	      struct bpf_nf_ctx, struct bpf_nf_ctx)
 #endif
 
+// struct bpf_verifier_opsのグローバル変数ruth_verifier_opsと、
+// struct bpf_prog_opsのグローバル変数ruth_prog_opsの宣言をしている。
+// ここでの宣言をもとに、Verifierはopsを使用することができる。
+// BPFプログラム側から見た引数の型が__s32、
+// カーネル側から見た引数の型がs32となっている（ここの型が微妙に
+// 違うのはなんで？）。
+BPF_PROG_TYPE(BPF_PROG_TYPE_RUTH, ruth, __s32, s32)
+
 BPF_MAP_TYPE(BPF_MAP_TYPE_ARRAY, array_map_ops)
 BPF_MAP_TYPE(BPF_MAP_TYPE_PERCPU_ARRAY, percpu_array_map_ops)
 BPF_MAP_TYPE(BPF_MAP_TYPE_PROG_ARRAY, prog_array_map_ops)

@@ -19,6 +19,11 @@
 #include <linux/ruth/sched.h>
 
 
+// __scheduleの実行途中かどうかの状態
+#define SCHEDULE_OUT	0
+#define SCHEDULE_IN	1
+
+static DEFINE_PER_CPU(int, state) = SCHEDULE_OUT;
 static DEFINE_PER_CPU(u64, cnt___schedule_entry) = 0;
 static DEFINE_PER_CPU(u64, cnt___schedule_exit) = 0;
 static DEFINE_PER_CPU(u64, timestamp___schedule) = 0;
@@ -28,6 +33,9 @@ void ruth_hook___schedule_entry(void)
 {
 	this_cpu_inc(cnt___schedule_entry);
 	this_cpu_write(timestamp___schedule, sched_clock());
+
+	WARN_ON_ONCE(this_cpu_read(state) == SCHEDULE_IN);
+	this_cpu_write(state, SCHEDULE_IN);
 }
 
 void ruth_hook___schedule_exit(void)
@@ -37,6 +45,9 @@ void ruth_hook___schedule_exit(void)
 	this_cpu_inc(cnt___schedule_exit);
 	elapsed_time = sched_clock() - this_cpu_read(timestamp___schedule);
 	this_cpu_add(exec_time___schedule, elapsed_time);
+
+	WARN_ON_ONCE(this_cpu_read(state) == SCHEDULE_OUT);
+	this_cpu_write(state, SCHEDULE_OUT);
 }
 
 // Implementation of /sys/kernel/ruth dir

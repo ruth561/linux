@@ -9,7 +9,8 @@
 
 #define pr_fmt(fmt) "%s:%s(): " fmt, KBUILD_MODNAME, __func__
 
-#include "linux/sysfs.h"
+#include <linux/sched/clock.h>
+#include <linux/sysfs.h>
 #include <linux/printk.h>
 #include <linux/init.h>
 #include <linux/types.h>
@@ -18,17 +19,24 @@
 #include <linux/ruth/sched.h>
 
 
-static DEFINE_PER_CPU(u64, cnt___schedule_entry);
-static DEFINE_PER_CPU(u64, cnt___schedule_exit);
+static DEFINE_PER_CPU(u64, cnt___schedule_entry) = 0;
+static DEFINE_PER_CPU(u64, cnt___schedule_exit) = 0;
+static DEFINE_PER_CPU(u64, timestamp___schedule) = 0;
+static DEFINE_PER_CPU(u64, exec_time___schedule) = 0;
 
 void ruth_hook___schedule_entry(void)
 {
 	this_cpu_inc(cnt___schedule_entry);
+	this_cpu_write(timestamp___schedule, sched_clock());
 }
 
 void ruth_hook___schedule_exit(void)
 {
+	u64 elapsed_time;
+
 	this_cpu_inc(cnt___schedule_exit);
+	elapsed_time = sched_clock() - this_cpu_read(timestamp___schedule);
+	this_cpu_add(exec_time___schedule, elapsed_time);
 }
 
 // Implementation of /sys/kernel/ruth dir
@@ -40,19 +48,22 @@ static ssize_t sched_show(struct kobject *kobj, struct kobj_attribute *attr,
 			  char *buf)
 {
 	int cpu;
-	u64 entries, exits;
+	u64 entries, exits, exec_time;
 
 	preempt_disable();
 	cpu = smp_processor_id();
 	entries = this_cpu_read(cnt___schedule_entry);
 	exits = this_cpu_read(cnt___schedule_exit);
+	exec_time = this_cpu_read(exec_time___schedule);
 	preempt_enable();
 
 	return sprintf(buf,
 		"cpu: %d\n"
-		"__schedule entry: %lld\n"
-		"__schedule exit:  %lld\n",
-		cpu, entries, exits
+		"__schedule entry:     %lld\n"
+		"__schedule exit:      %lld\n"
+		"__schedule exec time: %lld\n"
+		"__schedule avg time:  %lld\n",
+		cpu, entries, exits, exec_time, exec_time / exits
 	);
 }
 

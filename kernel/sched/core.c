@@ -5119,6 +5119,7 @@ asmlinkage __visible void schedule_tail(struct task_struct *prev)
 	 */
 
 	finish_task_switch(prev);
+	ruth_hook___schedule_exit();
 	preempt_enable();
 
 	if (current->set_child_tid)
@@ -6417,6 +6418,13 @@ static void __sched notrace __schedule(unsigned int sched_mode)
 	if (sched_feat(HRTICK) || sched_feat(HRTICK_DL))
 		hrtick_clear(rq);
 
+	// ここで割り込みが禁止される。割り込みが有効になる部分は、
+	// コンテキストスイッチが起きるかどうかで変わってくる。
+	//  - コンテキストスイッチが起きるとき
+	//    - context_switch --> finish_task_switch --> finish_lock_switch
+	//      でrqのロックが解放されるときにIRQも有効になる。
+	//  - コンテキストスイッチが起きないとき
+	//    - この関数内のraw_spin_rq_unlock_irqの呼び出しでIRQが有効になる。
 	local_irq_disable();
 	rcu_note_context_switch(!!sched_mode);
 

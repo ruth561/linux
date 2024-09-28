@@ -85,6 +85,8 @@
 #include <trace/events/ipi.h>
 #undef CREATE_TRACE_POINTS
 
+#include <linux/ruth/sched.h>
+
 #include "sched.h"
 #include "stats.h"
 
@@ -6404,6 +6406,8 @@ static void __sched notrace __schedule(unsigned int sched_mode)
 	struct rq *rq;
 	int cpu;
 
+	ruth_hook___schedule_entry();
+
 	cpu = smp_processor_id();
 	rq = cpu_rq(cpu);
 	prev = rq->curr;
@@ -6532,6 +6536,8 @@ static void __sched notrace __schedule(unsigned int sched_mode)
 		__balance_callbacks(rq);
 		raw_spin_rq_unlock_irq(rq);
 	}
+
+	ruth_hook___schedule_exit();
 }
 
 void __noreturn do_task_dead(void)
